@@ -75,6 +75,14 @@ resources:
           WriteCapacityUnits: 1
 
 functions:
+  scanDB:
+    handler: src/index.scanDB
+    events:
+      - http:
+          path: /scan
+          method: get
+          cors: false
+
   page:
     handler: src/index.index
     events:

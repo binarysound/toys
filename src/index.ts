@@ -3,7 +3,13 @@ import * as fs from 'fs'
 import { APIGatewayEventRequestContext, Handler } from 'aws-lambda'
 import * as AWS from 'aws-sdk'
 
-const { IS_OFFLINE, S3_STATIC_BUCKET_NAME } = process.env
+const {
+  IS_OFFLINE,
+  LOCAL_DYNAMODB_PORT,
+  REGION,
+  S3_STATIC_BUCKET_NAME,
+  DYNAMODB_TABLE_NAME,
+} = process.env
 
 export const index: Handler<APIGatewayEventRequestContext> = (_, context) => {
   const s3 = new AWS.S3()
@@ -55,4 +61,31 @@ export const webapp: Handler<APIGatewayEventRequestContext> = (_, context) => {
       statusCode: 404,
     })
   }
+}
+
+export const scanDB: Handler<APIGatewayEventRequestContext> = (_, context) => {
+  const dynamoDB = new AWS.DynamoDB({
+    region: IS_OFFLINE ? 'localhost' : REGION,
+    ...(IS_OFFLINE ? {
+      endpoint: `http://localhost:${LOCAL_DYNAMODB_PORT}`,
+      accessKeyId: 'DEFAULT_ACCESS_KEY',
+      secretAccessKey: 'DEFAULT_SECRET',
+    } : undefined),
+  })
+
+  dynamoDB.scan({
+    TableName: DYNAMODB_TABLE_NAME!,
+  }, (error, result) => {
+    if (error) {
+      context.fail(error)
+    } else {
+      context.succeed({
+        body: JSON.stringify(result.Items),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        statusCode: 200,
+      })
+    }
+  })
 }
