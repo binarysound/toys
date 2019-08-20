@@ -13,23 +13,76 @@ custom:
     stages:
       - production
     start:
+      migrate: true
       port: ${self:custom.localDynamoDBPort}
       inMemory: true
+      seed: true
+
+    seed:
+      test:
+        sources:
+          - table: toys
+            sources: [./dynamodb-local-seed.json]
 
   localDynamoDBPort: ${file(.custom.yml):LOCAL_DYNAMODB_PORT, '8000'}
+  region: ap-northeast-2
+  dynamoDBTableName: toys
+  s3StaticBucketName: ${file(.custom.yml):S3_STATIC_BUCKET_NAME}
 
 provider:
   name: aws
   runtime: nodejs8.10
-  region: ap-northeast-2
+  region: ${self:custom.region}
   stage: production
   profile: toys
 
   environment:
-    S3_STATIC_BUCKET_NAME: ${file(.custom.yml):S3_STATIC_BUCKET_NAME}
+    S3_STATIC_BUCKET_NAME: ${self:custom.s3StaticBucketName}
     LOCAL_DYNAMODB_PORT: ${self:custom.localDynamoDBPort}
+    REGION: ${self:custom.region}
+    DYNAMODB_TABLE_NAME: ${self:custom.dynamoDBTableName}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${self:custom.region}:*:table/${self:custom.dynamoDBTableName}"
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+      Resource: "arn:aws:s3:::${self:custom.s3StaticBucketName}/*"
+
+resources:
+  Resources:
+    toysTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.dynamoDBTableName}
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
 
 functions:
+  scanDB:
+    handler: src/index.scanDB
+    events:
+      - http:
+          path: /scan
+          method: get
+          cors: false
+
   page:
     handler: src/index.index
     events:
