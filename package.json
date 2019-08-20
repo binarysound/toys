@@ -1,0 +1,29 @@
+{
+  "name": "toys",
+  "version": "0.1.0",
+  "license": "MIT",
+  "scripts": {
+    "offline": "sls offline start",
+    "deploy-webapp": "DEPLOY_WEBAPP=true yarn webpack --config=webpack.webapp.config.js && aws s3 cp .webpack/service/src/webapp.js s3://toys.jeonghojeong/webapp.js --profile=toys",
+    "deploy": "sls deploy && yarn deploy-webapp"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.31",
+    "@types/node": "^12.7.2",
+    "@types/react": "^16.9.2",
+    "@types/react-dom": "^16.9.0",
+    "@types/styled-components": "^4.1.18",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
+    "serverless": "^1.50.0",
+    "serverless-dynamodb-local": "^0.2.38",
+    "serverless-offline": "5.10.1",
+    "serverless-webpack": "5.2.0",
+    "styled-components": "^4.3.2",
+    "ts-loader": "^6.0.4",
+    "typescript": "^3.5.3",
+    "webpack": "4.39.2",
+    "webpack-cli": "^3.3.7",
+    "webpack-node-externals": "^1.7.2"
+  }
+}

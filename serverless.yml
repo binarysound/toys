@@ -1,0 +1,55 @@
+service: toys
+
+plugins:
+  - serverless-webpack
+  - serverless-dynamodb-local
+  - serverless-offline
+
+custom:
+  webpack:
+    packager: 'yarn'
+
+  dynamodb:
+    stages:
+      - production
+    start:
+      port: ${self:custom.localDynamoDBPort}
+      inMemory: true
+
+  localDynamoDBPort: ${file(.custom.yml):LOCAL_DYNAMODB_PORT, '8000'}
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  region: ap-northeast-2
+  stage: production
+  profile: toys
+
+  environment:
+    S3_STATIC_BUCKET_NAME: ${file(.custom.yml):S3_STATIC_BUCKET_NAME}
+    LOCAL_DYNAMODB_PORT: ${self:custom.localDynamoDBPort}
+
+functions:
+  page:
+    handler: src/index.index
+    events:
+      - http:
+          path: /{any+}
+          method: get
+          cors: false
+
+  index:
+    handler: src/index.index
+    events:
+      - http:
+          path: /
+          method: get
+          cors: false
+
+  webapp:
+    handler: src/index.webapp
+    events:
+      - http:
+          path: /webapp.js
+          method: get
+          cors: false
