@@ -5,7 +5,8 @@
   "scripts": {
     "offline": "sls offline start",
     "deploy-webapp": "DEPLOY_WEBAPP=true yarn webpack --config=webpack.webapp.config.js && aws s3 cp .webpack/service/src/webapp.js s3://toys.jeonghojeong/webapp.js --profile=toys",
-    "deploy": "sls deploy && yarn deploy-webapp"
+    "deploy": "sls deploy && yarn deploy-webapp",
+    "lint": "eslint src/**/*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.31",
@@ -13,6 +14,10 @@
     "@types/react": "^16.9.2",
     "@types/react-dom": "^16.9.0",
     "@types/styled-components": "^4.1.18",
+    "@typescript-eslint/eslint-plugin": "^2.0.0",
+    "@typescript-eslint/parser": "^2.0.0",
+    "eslint": "^6.2.1",
+    "eslint-plugin-react": "^7.14.3",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "serverless": "^1.50.0",
