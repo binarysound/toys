@@ -21,12 +21,12 @@ custom:
     seed:
       test:
         sources:
-          - table: toys
+          - table: ${self:custom.dynamoDBTableName}
             sources: [./dynamodb-local-seed.json]
 
   localDynamoDBPort: ${file(.custom.yml):LOCAL_DYNAMODB_PORT, '8000'}
   region: ap-northeast-2
-  dynamoDBTableName: toys
+  dynamoDBTableName: toys_2
   s3StaticBucketName: ${file(.custom.yml):S3_STATIC_BUCKET_NAME}
 
 provider:
@@ -60,23 +60,43 @@ provider:
 
 resources:
   Resources:
-    toysTable:
+    toysTableSecond:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.dynamoDBTableName}
         AttributeDefinitions:
-          - AttributeName: email
+          - AttributeName: pk
+            AttributeType: S
+          - AttributeName: sk
             AttributeType: S
         KeySchema:
-          - AttributeName: email
+          - AttributeName: pk
             KeyType: HASH
+          - AttributeName: sk
+            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
 
 functions:
+  getWords:
+    handler: src/lambda/words.getWords
+    events:
+      - http:
+          path: /words
+          method: get
+          cors: false
+
+  createWord:
+    handler: src/lambda/words.createWord
+    events:
+      - http:
+          path: /word
+          method: post
+          cors: false
+
   scanDB:
-    handler: src/index.scanDB
+    handler: src/lambda/index.scanDB
     events:
       - http:
           path: /scan
@@ -84,7 +104,7 @@ functions:
           cors: false
 
   page:
-    handler: src/index.index
+    handler: src/lambda/index.index
     events:
       - http:
           path: /{any+}
@@ -92,7 +112,7 @@ functions:
           cors: false
 
   index:
-    handler: src/index.index
+    handler: src/lambda/index.index
     events:
       - http:
           path: /
@@ -100,7 +120,7 @@ functions:
           cors: false
 
   webapp:
-    handler: src/index.webapp
+    handler: src/lambda/index.webapp
     events:
       - http:
           path: /webapp.js
