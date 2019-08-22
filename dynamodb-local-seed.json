@@ -1,6 +1,25 @@
 [
   {
-    "email": "hello@example.com",
-    "id": 1
+    "pk": "user_Foo",
+    "sk": "2019-08-20T09:09:09.000Z",
+    "wordlists": ["English"],
+    "name": "Foo"
+  },
+  {
+    "pk": "wordlist_English",
+    "sk": "2019-08-20T10:10:10.000Z",
+    "name": "English"
+  },
+  {
+    "pk": "wordlist_English_words",
+    "sk": "2019-08-20T10:10:11.000Z",
+    "word": "apple",
+    "desc": "사과"
+  },
+  {
+    "pk": "wordlist_English_words",
+    "sk": "2019-08-20T10:10:12.000Z",
+    "word": "house",
+    "desc": "집"
   }
 ]
