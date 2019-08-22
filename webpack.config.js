@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const fs = require('fs')
 const util = require('util')
 const path = require('path')
@@ -6,6 +7,8 @@ const slsw = require('serverless-webpack')
 
 const baseConfig = require('./webpack.base.config')
 const webappConfig = require('./webpack.webapp.config')
+
+const { IS_OFFLINE } = process.env
 
 async function walk(dir) {
   const rootFiles = await util.promisify(fs.readdir)(dir)
@@ -44,7 +47,7 @@ module.exports = (async () => {
     name: 'server',
     entry: await makeEntries('./src/lambda'),
     target: 'node',
-    externals: [nodeExternals()],
+    externals: IS_OFFLINE ? [nodeExternals()] : undefined,
     output: {
       libraryTarget: 'commonjs',
       path: path.join(__dirname, '.webpack/service'),
