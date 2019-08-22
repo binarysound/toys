@@ -1,3 +1,5 @@
+const path = require('path')
+
 const slsw = require('serverless-webpack')
 
 const { DEPLOY_WEBAPP } = process.env
@@ -16,6 +18,9 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js']
+    extensions: ['.tsx', '.ts', '.js'],
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
   }
 }
