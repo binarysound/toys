@@ -79,8 +79,24 @@ resources:
           WriteCapacityUnits: 1
 
 functions:
+  getWords:
+    handler: src/lambda/words.getWords
+    events:
+      - http:
+          path: /words
+          method: get
+          cors: false
+
+  createWord:
+    handler: src/lambda/words.createWord
+    events:
+      - http:
+          path: /word
+          method: post
+          cors: false
+
   scanDB:
-    handler: src/index.scanDB
+    handler: src/lambda/index.scanDB
     events:
       - http:
           path: /scan
@@ -88,7 +104,7 @@ functions:
           cors: false
 
   page:
-    handler: src/index.index
+    handler: src/lambda/index.index
     events:
       - http:
           path: /{any+}
@@ -96,7 +112,7 @@ functions:
           cors: false
 
   index:
-    handler: src/index.index
+    handler: src/lambda/index.index
     events:
       - http:
           path: /
@@ -104,7 +120,7 @@ functions:
           cors: false
 
   webapp:
-    handler: src/index.webapp
+    handler: src/lambda/index.webapp
     events:
       - http:
           path: /webapp.js

@@ -1,17 +1,16 @@
 import * as fs from 'fs'
 
-import { APIGatewayEventRequestContext, Handler } from 'aws-lambda'
 import * as AWS from 'aws-sdk'
+
+import { APIGatewayHandler } from '@/types'
+import { getDynamoDB, DYNAMODB_TABLE_NAME } from '@/db'
 
 const {
   IS_OFFLINE,
-  LOCAL_DYNAMODB_PORT,
-  REGION,
   S3_STATIC_BUCKET_NAME,
-  DYNAMODB_TABLE_NAME,
 } = process.env
 
-export const index: Handler<APIGatewayEventRequestContext> = (_, context) => {
+export const index: APIGatewayHandler = (_, context) => {
   const s3 = new AWS.S3()
   const scriptUrl = IS_OFFLINE ?
     '/webapp.js' :
@@ -21,19 +20,22 @@ export const index: Handler<APIGatewayEventRequestContext> = (_, context) => {
       Key: 'webapp.js',
     })
 
+  const appConfig = {
+    apiPrefix: IS_OFFLINE ? '' : '/production',
+  }
+
   const response = {
-    body: `
-<html>
+    body: `<html>
 <head>
   <meta charset="utf-8">
   <title>BINARYSOUND:TOYS</title>
 </head>
 <body>
   <div id="root"></div>
+  <script type="text/javascript">window.APP_CONFIG=${JSON.stringify(appConfig)}</script>
   <script type="text/javascript" src="${scriptUrl}"></script>
 </body>
-</html>
-`,
+</html>`,
     headers: {
       'Content-Type': 'text/html',
     },
@@ -43,7 +45,7 @@ export const index: Handler<APIGatewayEventRequestContext> = (_, context) => {
   context.succeed(response)
 }
 
-export const webapp: Handler<APIGatewayEventRequestContext> = (_, context) => {
+export const webapp: APIGatewayHandler = (_, context) => {
   if (IS_OFFLINE) {
     fs.readFile('.webpack/service/src/webapp.js', 'utf-8', (__, data) => {
       const response = {
@@ -63,29 +65,24 @@ export const webapp: Handler<APIGatewayEventRequestContext> = (_, context) => {
   }
 }
 
-export const scanDB: Handler<APIGatewayEventRequestContext> = (_, context) => {
-  const dynamoDB = new AWS.DynamoDB({
-    region: IS_OFFLINE ? 'localhost' : REGION,
-    ...(IS_OFFLINE ? {
-      endpoint: `http://localhost:${LOCAL_DYNAMODB_PORT}`,
-      accessKeyId: 'DEFAULT_ACCESS_KEY',
-      secretAccessKey: 'DEFAULT_SECRET',
-    } : undefined),
-  })
+export const scanDB: APIGatewayHandler = async () => {
+  const dynamoDB = getDynamoDB()
 
-  dynamoDB.scan({
+  const result = await dynamoDB.scan({
     TableName: DYNAMODB_TABLE_NAME!,
-  }, (error, result) => {
-    if (error) {
-      context.fail(error)
-    } else {
-      context.succeed({
-        body: JSON.stringify(result.Items),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        statusCode: 200,
-      })
+  }).promise()
+
+  const { error, data } = result.$response
+
+  if (error) {
+    throw error
+  } else {
+    return {
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      statusCode: 200,
     }
-  })
+  }
 }
