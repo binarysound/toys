@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "license": "MIT",
   "scripts": {
-    "offline": "sls offline start",
+    "offline": "IS_OFFLINE=true sls offline start",
     "deploy-webapp": "DEPLOY_WEBAPP=true yarn webpack --config=webpack.webapp.config.js && aws s3 cp .webpack/service/src/webapp.js s3://toys.jeonghojeong/webapp.js --profile=toys",
     "deploy": "sls deploy && yarn deploy-webapp",
     "lint": "eslint src/**/*"
