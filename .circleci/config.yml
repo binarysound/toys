@@ -1,0 +1,61 @@
+version: 2.1
+
+executors:
+  main:
+    docker:
+      - image: circleci/node:8.10
+
+    working_directory: ~/repo
+
+jobs:
+  build:
+    executor: main
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - v2-dependencies-{{ checksum "package.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - v2-dependencies-
+
+      - run: yarn install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v2-dependencies-{{ checksum "package.json" }}
+
+      - run: yarn lint
+
+      - run:
+          name: Test server-side build
+          command: yarn webpack
+
+      - run:
+          name: Test client-side build
+          command: yarn webpack --config=webpack.webapp.config.js
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  deploy:
+    executor: main
+    steps:
+      - attach_workspace:
+          at: ~/repo
+
+      - run: yarn deploy
+
+workflows:
+  version: 2.1
+  build-deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
