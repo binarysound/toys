@@ -4,8 +4,10 @@
   "license": "MIT",
   "scripts": {
     "offline": "IS_OFFLINE=true sls offline start",
-    "deploy-webapp": "DEPLOY_WEBAPP=true yarn webpack --config=webpack.webapp.config.js && aws s3 cp .webpack/service/src/webapp.js s3://toys.jeonghojeong/webapp.js --profile=toys",
-    "deploy": "sls deploy && yarn deploy-webapp",
+    "build:webapp": "IS_PRODUCTION=true yarn webpack --config=webpack.webapp.config.js",
+    "deploy:webapp": "yarn build:webapp && aws s3 cp .webpack/service/src/webapp.js \"s3://$S3_STATIC_BUCKET_NAME/webapp.js\"",
+    "deploy:server": "SLS_DEBUG=* sls deploy -v",
+    "deploy": "yarn deploy:server && yarn deploy:webapp",
     "lint": "eslint src/**/*"
   },
   "devDependencies": {
