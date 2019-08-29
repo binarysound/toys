@@ -3,11 +3,11 @@ const path = require('path')
 
 const slsw = require('serverless-webpack')
 
-const { DEPLOY_WEBAPP } = process.env
+const { IS_PRODUCTION } = process.env
 
 module.exports = {
   mode:
-    DEPLOY_WEBAPP ? 'production' :
+    IS_PRODUCTION ? 'production' :
       slsw.lib.webpack.isLocal ? 'development': 'production',
   module: {
     rules: [
