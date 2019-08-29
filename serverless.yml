@@ -27,22 +27,21 @@ custom:
           - table: ${self:custom.dynamoDBTableName}
             sources: [./dynamodb-local-seed.json]
 
-  localDynamoDBPort: ${file(.custom.yml):LOCAL_DYNAMODB_PORT, '8000'}
-  region: ap-northeast-2
-  dynamoDBTableName: toys_2
-  s3StaticBucketName: ${file(.custom.yml):S3_STATIC_BUCKET_NAME}
+  localDynamoDBPort: ${env:LOCAL_DYNAMODB_PORT, '8000'}
+  awsRegion: ${env:AWS_REGION, ''}
+  dynamoDBTableName: ${env:DYNAMODB_TABLE_NAME, 'toys'}
+  s3StaticBucketName: ${env:S3_STATIC_BUCKET_NAME, ''}
 
 provider:
   name: aws
   runtime: nodejs8.10
-  region: ${self:custom.region}
+  region: ${self:custom.awsRegion}
   stage: production
-  profile: toys
 
   environment:
     S3_STATIC_BUCKET_NAME: ${self:custom.s3StaticBucketName}
     LOCAL_DYNAMODB_PORT: ${self:custom.localDynamoDBPort}
-    REGION: ${self:custom.region}
+    REGION: ${self:custom.awsRegion}
     DYNAMODB_TABLE_NAME: ${self:custom.dynamoDBTableName}
 
   iamRoleStatements:
@@ -55,7 +54,7 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:${self:custom.region}:*:table/${self:custom.dynamoDBTableName}"
+      Resource: "arn:aws:dynamodb:${self:custom.awsRegion}:*:table/${self:custom.dynamoDBTableName}"
     - Effect: Allow
       Action:
         - s3:GetObject
