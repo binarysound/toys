@@ -36,7 +36,7 @@ export class App extends React.Component<Props, State> {
 
   public async updateWords() {
     const { wordlistId } = this.state
-    const fetched = await fetch(`${(window as any).APP_CONFIG.apiPrefix}/words?wordlistId=${wordlistId}`)
+    const fetched = await fetch(`/words?wordlistId=${wordlistId}`)
     const words = await fetched.json()
     this.setState({
       words,
@@ -78,7 +78,7 @@ export class App extends React.Component<Props, State> {
                   desc: '',
                 })
 
-                await fetch(`${(window as any).APP_CONFIG.apiPrefix}/word`, {
+                await fetch(`/word`, {
                   headers: {
                     'Content-Type': 'application/json',
                   },
