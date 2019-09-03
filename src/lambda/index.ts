@@ -20,10 +20,6 @@ export const index: APIGatewayHandler = (_, context) => {
       Key: 'webapp.js',
     })
 
-  const appConfig = {
-    apiPrefix: IS_OFFLINE ? '' : '/production',
-  }
-
   const response = {
     body: `<html>
 <head>
@@ -32,7 +28,6 @@ export const index: APIGatewayHandler = (_, context) => {
 </head>
 <body>
   <div id="root"></div>
-  <script type="text/javascript">window.APP_CONFIG=${JSON.stringify(appConfig)}</script>
   <script type="text/javascript" src="${scriptUrl}"></script>
 </body>
 </html>`,
