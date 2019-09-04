@@ -31,6 +31,7 @@ custom:
   awsRegion: ${env:AWS_REGION, ''}
   dynamoDBTableName: ${env:DYNAMODB_TABLE_NAME, 'toys'}
   s3StaticBucketName: ${env:S3_STATIC_BUCKET_NAME, ''}
+  apiPrivateKey: ${env:API_PRIVATE_KEY, 'DEFAULT_PRIVATE_KEY'}
 
 provider:
   name: aws
@@ -43,6 +44,7 @@ provider:
     LOCAL_DYNAMODB_PORT: ${self:custom.localDynamoDBPort}
     REGION: ${self:custom.awsRegion}
     DYNAMODB_TABLE_NAME: ${self:custom.dynamoDBTableName}
+    API_PRIVATE_KEY: ${self:custom.apiPrivateKey}
 
   iamRoleStatements:
     - Effect: Allow
@@ -127,4 +129,12 @@ functions:
       - http:
           path: /webapp.js
           method: get
+          cors: false
+
+  login:
+    handler: src/lambda/auth.login
+    events:
+      - http:
+          path: /login
+          method: post
           cors: false

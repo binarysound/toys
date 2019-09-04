@@ -10,7 +10,7 @@ const {
   S3_STATIC_BUCKET_NAME,
 } = process.env
 
-export const index: APIGatewayHandler = (_, context) => {
+export const index: APIGatewayHandler = async () => {
   const s3 = new AWS.S3()
   const scriptUrl = IS_OFFLINE ?
     '/webapp.js' :
@@ -37,7 +37,7 @@ export const index: APIGatewayHandler = (_, context) => {
     statusCode: 200,
   }
 
-  context.succeed(response)
+  return response
 }
 
 export const webapp: APIGatewayHandler = (_, context) => {
